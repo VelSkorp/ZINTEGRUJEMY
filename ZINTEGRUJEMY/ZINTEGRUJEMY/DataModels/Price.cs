@@ -2,7 +2,7 @@
 {
 	public class Price
 	{
-		public int ID { get; set; }
+		public string ID { get; set; }
 		public string SKU { get; set; }
 		public decimal NettPrice { get; set; }
 		public decimal NettPriceAfterDiscount { get; set; }
