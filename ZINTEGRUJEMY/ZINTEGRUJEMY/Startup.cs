@@ -12,7 +12,6 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddDbContext<DatabaseContext>();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
         }
