@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using Dapper;
 using Serilog;
+using MoreLinq;
 
 namespace ZINTEGRUJEMY
 {
@@ -23,14 +24,32 @@ namespace ZINTEGRUJEMY
 
 		public async Task WriteToTableAsync<T>(IEnumerable<T> data, string tableName)
 		{
-			using (var dbConnection = new SqliteConnection(_connectionString))
-			{
-				await dbConnection.OpenAsync();
+            using (var dbConnection = new SqliteConnection(_connectionString))
+            {
+                await dbConnection.OpenAsync();
 
-				await CreateTablesIfNotExistsAsync(dbConnection);
+                await CreateTablesIfNotExistsAsync(dbConnection);
 
-				await dbConnection.ExecuteAsync($"INSERT INTO {tableName} VALUES ({_tablesValues[tableName]})", data);
-			}
+                using (var transaction = await dbConnection.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        foreach (var batch in data.Batch(1000))
+                        {
+                            var insertQuery = $"INSERT INTO {tableName} VALUES ({_tablesValues[tableName]})";
+                            await dbConnection.ExecuteAsync(insertQuery, batch, transaction);
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+				        Log.Error($"Error when inserting data into the database: {ex.Message}");
+                        throw;
+                    }
+                }
+            }
 		}
 
 		private async Task CreateTablesIfNotExistsAsync(IDbConnection dbConnection)

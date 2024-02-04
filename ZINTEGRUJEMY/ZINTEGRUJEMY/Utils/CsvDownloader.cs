@@ -1,36 +1,41 @@
 ﻿using Serilog;
-using System.Net;
 
 namespace ZINTEGRUJEMY
 {
 	public class CsvDownloader
-	{
-		public async Task<string> DownloadAndSaveCsvAsync(string url)
-		{
-			var uri = new Uri(url);
-			var fileName = Path.GetFileName(uri.LocalPath);
-			var savePath = Path.Combine(@".\Data", fileName);
+    {
+        public async Task<string> DownloadAndSaveCsvAsync(string url)
+        {
+            var uri = new Uri(url);
+            var fileName = Path.GetFileName(uri.LocalPath);
+            var savePath = Path.Combine(@".\Data", fileName);
 
-			if (File.Exists(savePath))
-			{
-				Log.Information($"{fileName} file upload has skiped, the file already exists");
-				return fileName;
-			}
+            if (File.Exists(savePath))
+            {
+                Log.Information($"{fileName} file upload has skiped, the file already exists");
+                return fileName;
+            }
 
-			try
-			{
-				using (var client = new WebClient())
-				{
-					await client.DownloadFileTaskAsync(uri, savePath);
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error($"An error occurred while downloading and saving the CSV file: {ex.Message}");
-				throw;
-			}
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.ConnectionClose = false;
+                httpClient.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                httpClient.Timeout = Timeout.InfiniteTimeSpan;
 
-			return fileName;
-		}
-	}
+                var response = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+
+                response.EnsureSuccessStatusCode();
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                {
+                    using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        await stream.CopyToAsync(fileStream);
+                    }
+
+                    return savePath;
+                }
+            }
+        }
+    }
 }
