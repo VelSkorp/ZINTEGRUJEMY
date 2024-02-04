@@ -27,6 +27,7 @@ namespace ZINTEGRUJEMY
 			catch (Exception ex)
 			{
 				Log.Error($"An error occurred while downloading and saving the CSV file: {ex.Message}");
+				throw;
 			}
 
 			return fileName;

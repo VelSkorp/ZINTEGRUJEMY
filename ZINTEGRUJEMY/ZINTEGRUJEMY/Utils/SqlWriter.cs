@@ -12,7 +12,7 @@ namespace ZINTEGRUJEMY
 		private readonly Dictionary<string, string> _tablesValues = new Dictionary<string, string>()
 		{
 			{ "Products", "@ID, @SKU, @Name, @EAN, @ProducerName, @Category, @IsWire, @Available, @IsVendor, @DefaultImage" },
-			{ "Inventories", "@ProductID, @SKU, @Unit, @Quantity, @Manufacturer, @Shipping, @ShippingCost" },
+			{ "Inventory", "@ProductID, @SKU, @Unit, @Quantity, @Manufacturer, @Shipping, @ShippingCost" },
 			{ "Prices", "@ID, @SKU, @NettPrice, @NettPriceAfterDiscount, @VatRate, @NettPriceAfterDiscountForLogisticUnit" },
 		};
 
@@ -48,6 +48,7 @@ namespace ZINTEGRUJEMY
 			catch (Exception ex)
 			{
 				Log.Error($"Error when loading a database schema from a file: {ex.Message}");
+				throw;
 			}
 		}
 	} 

@@ -1,9 +1,13 @@
+using CsvHelper;
+using CsvHelper.TypeConversion;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using ZINTEGRUJEMY.DataModels;
 
 namespace ZINTEGRUJEMY
 {
 	[ApiController]
-	[Route("ZINTEGRUJEMY.pl/api/products")]
+	[Route("ZINTEGRUJEMY.pl/api")]
 	public class ProductsController : ControllerBase
 	{
 		private readonly CsvDownloader _csvDownloader;
@@ -17,16 +21,47 @@ namespace ZINTEGRUJEMY
 			_sqlWriter = sqlWriter;
 		}
 
-		[HttpPost("process-csv")]
-		public async Task<IActionResult> ProcessCsvAsync([FromBody] string productsLink)
+		[HttpPost("products")]
+		public async Task<IActionResult> ProcessCsvAsync([FromBody] LinksToSource links)
 		{
-			//test
-			var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(productsLink);
-			var allProducts = _csvReader.ReadCsv<Product>(fileName);
-			var filtered = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
-			_sqlWriter.WriteToTable(filtered, "Products");
+			try
+			{
+                var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
+                var allProducts = _csvReader.ReadCsv<Product>(fileName);
+                var filteredProducts = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
+                _sqlWriter.WriteToTable(filteredProducts, "Products");
 
-			return Ok("Ok");
+                fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
+                var allInventories = _csvReader.ReadCsv<Inventory>(fileName);
+                var filteredInventories = allInventories.Where(inventory => inventory.Shipping.Equals("24h"));
+                _sqlWriter.WriteToTable(filteredInventories, "Inventory");
+
+                fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
+				var prices = _csvReader.ReadCsv<Price>(fileName);
+				_sqlWriter.WriteToTable(prices, "Prices");
+			}
+			catch (FileNotFoundException ex)
+			{
+				Log.Fatal(ex.Message);
+				return Problem();
+			}
+			catch (TypeConverterException ex)
+			{
+				Log.Fatal($"Fatal error in the field {ex.Text} when converting a record: {ex.Message}");
+				return Problem();
+			}
+			catch (BadDataException ex)
+			{
+				Log.Fatal($"Fatal error in the field {ex.Field} when reading a record: {ex.RawRecord}");
+				return Problem();
+			}
+			catch (Exception ex)
+			{
+				Log.Fatal(ex.Message);
+				return Problem();
+			}
+
+			return Accepted("Data successfully downloaded and saved");
 		}
 
 		[HttpGet("product-info/{sku}")]

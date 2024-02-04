@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Products (
 	DefaultImage TEXT
 );
 
-CREATE TABLE IF NOT EXISTS Inventories (
+CREATE TABLE IF NOT EXISTS Inventory (
 	ProductID INTEGER UNIQUE NOT NULL,
 	SKU TEXT UNIQUE NOT NULL,
 	Unit TEXT NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Inventories (
 	Manufacturer TEXT,
 	Shipping TEXT NOT NULL,
 	ShippingCost REAL,
-	PRIMARY KEY (ProductID, SKU),
+	PRIMARY KEY (ProductID, SKU)
 	FOREIGN KEY (ProductID) REFERENCES Products(ID)
 );
 
@@ -29,6 +29,6 @@ CREATE TABLE IF NOT EXISTS Prices (
 	NettPrice REAL NOT NULL,
 	NettPriceAfterDiscount REAL NOT NULL,
 	VatRate REAL NOT NULL,
-	NettPriceAfterDiscountForLogisticUnit REAL NOT NULL,
+	NettPriceAfterDiscountForLogisticUnit REAL NOT NULL
 	FOREIGN KEY (SKU) REFERENCES Products(SKU)
 );

@@ -1,5 +1,4 @@
 ﻿using CsvHelper.Configuration;
-using Serilog;
 using System.Globalization;
 
 namespace ZINTEGRUJEMY
@@ -15,27 +14,26 @@ namespace ZINTEGRUJEMY
 				throw new FileNotFoundException($"File {fileName} doesn't exist.");
 			}
 
-			var conf = new CsvConfiguration(CultureInfo.InvariantCulture)
-			{
-				Delimiter = ";",
-				HasHeaderRecord = false,
-				BadDataFound = (error) => { Log.Error($"Error when reading a record: {error.Context}; {error.Field}; {error.RawRecord}"); },
-				ReadingExceptionOccurred = (error) => 
-				{
-					Log.Error($"Error when reading a record: {error.Exception.Message}"); 
-					return false; 
-				}
-			};
-
 			using (var reader = new StreamReader(filePath))
-			using (var csv = new CsvHelper.CsvReader(reader, conf))
 			{
-				csv.Context.RegisterClassMap<ProductCsvMap>();
-				csv.Context.RegisterClassMap<PriceCsvMap>();
-				csv.Context.RegisterClassMap<InventoryCsvMap>();
+				var headerLine = reader.ReadLine();
+				var delimiter = headerLine.Contains(";") ? ";" : ",";
+				var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+				{
+					Delimiter = delimiter,
+					HasHeaderRecord = false,
+					ShouldSkipRecord = record => record.Row.GetField(0).Equals("__empty_line__"),
+				};
 
-				csv.Read();
-				return csv.GetRecords<T>().ToList();
+
+				using (var csv = new CsvHelper.CsvReader(reader, config))
+				{
+					csv.Context.RegisterClassMap<ProductCsvMap>();
+					csv.Context.RegisterClassMap<PriceCsvMap>();
+					csv.Context.RegisterClassMap<InventoryCsvMap>();
+
+					return csv.GetRecords<T>().ToList();
+				}
 			}
 		}
 	}
