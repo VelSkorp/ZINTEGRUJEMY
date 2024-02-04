@@ -42,7 +42,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5080/ZINTEGRUJEMY.pl/api/products/product-info/0650-521YY-ER001",
+					"raw": "http://localhost:5080/ZINTEGRUJEMY.pl/api/product-info/0742-114AA-ER003",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -51,9 +51,8 @@
 					"path": [
 						"ZINTEGRUJEMY.pl",
 						"api",
-						"products",
 						"product-info",
-						"0650-521YY-ER001"
+						"0742-114AA-ER003"
 					]
 				}
 			},

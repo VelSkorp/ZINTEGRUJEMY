@@ -13,12 +13,14 @@ namespace ZINTEGRUJEMY
 		private readonly CsvDownloader _csvDownloader;
 		private readonly CsvReader _csvReader;
 		private readonly SqlWriter _sqlWriter;
+		private readonly SqlReader _sqlReader;
 
-		public ProductsController(CsvDownloader csvDownloader, CsvReader csvReader, SqlWriter sqlWriter)
+		public ProductsController(CsvDownloader csvDownloader, CsvReader csvReader, SqlWriter sqlWriter, SqlReader sqlReader)
 		{
 			_csvDownloader = csvDownloader;
 			_csvReader = csvReader;
 			_sqlWriter = sqlWriter;
+			_sqlReader = sqlReader;
 		}
 
 		[HttpPost("products")]
@@ -26,19 +28,21 @@ namespace ZINTEGRUJEMY
 		{
 			try
 			{
-                var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
-                var allProducts = await _csvReader.ReadCsvAsync<Product>(fileName);
-                var filteredProducts = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
-                await _sqlWriter.WriteToTableAsync(filteredProducts, "Products");
+				var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
+				var allProducts = await _csvReader.ReadCsvAsync<Product>(fileName);
+				var filteredProducts = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
+				await _sqlWriter.WriteToTableAsync(filteredProducts, "Products");
 
-                fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
-                var allInventories = await _csvReader.ReadCsvAsync<Inventory>(fileName);
-                var filteredInventories = allInventories.Where(inventory => inventory.Shipping.Equals("24h"));
-                await _sqlWriter.WriteToTableAsync(filteredInventories, "Inventory");
+				fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
+				var allInventories = await _csvReader.ReadCsvAsync<Inventory>(fileName);
+				var filteredInventories = allInventories.Where(inventory => inventory.Shipping.Equals("24h"));
+				await _sqlWriter.WriteToTableAsync(filteredInventories, "Inventory");
 
-                fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
+				fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
 				var prices = await _csvReader.ReadCsvAsync<Price>(fileName);
 				await _sqlWriter.WriteToTableAsync(prices, "Prices");
+
+				return Accepted("Data successfully downloaded and saved");
 			}
 			catch (FileNotFoundException ex)
 			{
@@ -60,14 +64,27 @@ namespace ZINTEGRUJEMY
 				Log.Fatal(ex.Message);
 				return Problem();
 			}
-
-			return Accepted("Data successfully downloaded and saved");
 		}
 
 		[HttpGet("product-info/{sku}")]
 		public async Task<IActionResult> GetProductInfoAsync(string sku)
 		{
-			return Ok("Ok");
+			try
+			{
+				var productDetails = await _sqlReader.GetProductDetailsBySKUAsync(sku);
+
+				if (productDetails == null)
+				{
+					return NotFound($"Product with SKU {sku} not found.");
+				}
+
+				return Ok(productDetails);
+			}
+			catch (Exception ex)
+			{
+				Log.Fatal(ex.Message);
+				return Problem();
+			}
 		}
 	}
 }

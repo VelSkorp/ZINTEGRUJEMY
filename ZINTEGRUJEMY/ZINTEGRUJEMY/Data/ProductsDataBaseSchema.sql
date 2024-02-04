@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS Inventory (
 	Shipping TEXT NOT NULL,
 	ShippingCost REAL,
 	PRIMARY KEY (ProductID, SKU)
-	FOREIGN KEY (ProductID) REFERENCES Products(ID)
+	--FOREIGN KEY (ProductID) REFERENCES Products(ID)
 );
 
 CREATE TABLE IF NOT EXISTS Prices (
@@ -30,5 +30,5 @@ CREATE TABLE IF NOT EXISTS Prices (
 	NettPriceAfterDiscount REAL NOT NULL,
 	VatRate REAL NOT NULL,
 	NettPriceAfterDiscountForLogisticUnit REAL
-	FOREIGN KEY (SKU) REFERENCES Products(SKU)
+	--FOREIGN KEY (SKU) REFERENCES Products(SKU)
 );

@@ -31,6 +31,13 @@ namespace ZINTEGRUJEMY
 
 				return new SqlWriter(connectionString);
 			});
+			services.AddSingleton(provider =>
+			{
+				var configuration = provider.GetRequiredService<IConfiguration>();
+				var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+				return new SqlReader(connectionString);
+			});
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
