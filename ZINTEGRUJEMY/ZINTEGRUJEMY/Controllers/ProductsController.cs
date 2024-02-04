@@ -18,8 +18,14 @@ namespace ZINTEGRUJEMY
 		}
 
 		[HttpPost("process-csv")]
-		public IActionResult ProcessCsv()
+		public async Task<IActionResult> ProcessCsvAsync([FromBody] string productsLink)
 		{
+			//test
+			var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(productsLink);
+			var allProducts = _csvReader.ReadCsv<Product>(fileName);
+			var filtered = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
+			_sqlWriter.WriteToTable(filtered, "Products");
+
 			return Ok("Ok");
 		}
 

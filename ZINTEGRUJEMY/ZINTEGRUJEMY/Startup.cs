@@ -1,40 +1,57 @@
-﻿namespace ZINTEGRUJEMY
+﻿using Serilog;
+
+namespace ZINTEGRUJEMY
 {
-    public class Startup
-    {
-        public IConfiguration Configuration { get; }
-     
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+	public class Startup
+	{
+		public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllers();
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-        }
+		public Startup(IConfiguration configuration)
+		{
+			Configuration = configuration;
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-                app.UseDeveloperExceptionPage();
-            }
+			Log.Logger = new LoggerConfiguration()
+				.WriteTo.File(@"Logs\log.txt", rollingInterval: RollingInterval.Day)
+				.WriteTo.Console()
+				.CreateLogger();
+		}
 
-            app.UseHttpsRedirection();
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddControllers();
+			services.AddEndpointsApiExplorer();
+			services.AddSwaggerGen();
 
-            app.UseRouting();
+			services.AddSingleton<CsvDownloader>();
+			services.AddSingleton<CsvReader>();
+			services.AddSingleton(provider =>
+			{
+				var configuration = provider.GetRequiredService<IConfiguration>();
+				var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            app.UseAuthorization();
+				return new SqlWriter(connectionString);
+			});
+		}
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
-    }
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		{
+			if (env.IsDevelopment())
+			{
+				app.UseSwagger();
+				app.UseSwaggerUI();
+				app.UseDeveloperExceptionPage();
+			}
+
+			app.UseHttpsRedirection();
+
+			app.UseRouting();
+
+			app.UseAuthorization();
+
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+			});
+		}
+	}
 }
