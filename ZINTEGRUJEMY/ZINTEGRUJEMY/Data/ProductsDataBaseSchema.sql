@@ -29,6 +29,6 @@ CREATE TABLE IF NOT EXISTS Prices (
 	NettPrice REAL NOT NULL,
 	NettPriceAfterDiscount REAL NOT NULL,
 	VatRate REAL NOT NULL,
-	NettPriceAfterDiscountForLogisticUnit REAL NOT NULL
+	NettPriceAfterDiscountForLogisticUnit REAL
 	FOREIGN KEY (SKU) REFERENCES Products(SKU)
 );

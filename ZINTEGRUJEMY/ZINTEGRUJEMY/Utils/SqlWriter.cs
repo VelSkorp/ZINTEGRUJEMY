@@ -21,29 +21,29 @@ namespace ZINTEGRUJEMY
 			_connectionString = connectionString;
 		}
 
-		public void WriteToTable<T>(IEnumerable<T> data, string tableName)
+		public async Task WriteToTableAsync<T>(IEnumerable<T> data, string tableName)
 		{
 			using (var dbConnection = new SqliteConnection(_connectionString))
 			{
-				dbConnection.Open();
+				await dbConnection.OpenAsync();
 
-				CreateTablesIfNotExists(dbConnection);
+				await CreateTablesIfNotExistsAsync(dbConnection);
 
-				dbConnection.Execute($"INSERT INTO {tableName} VALUES ({_tablesValues[tableName]})", data);
+				await dbConnection.ExecuteAsync($"INSERT INTO {tableName} VALUES ({_tablesValues[tableName]})", data);
 			}
 		}
 
-		private void CreateTablesIfNotExists(IDbConnection dbConnection)
+		private async Task CreateTablesIfNotExistsAsync(IDbConnection dbConnection)
 		{
 			try
 			{
 				string sqlScript;
 				using (var sr = new StreamReader(FilePath))
 				{
-					sqlScript = sr.ReadToEnd();
+					sqlScript = await sr.ReadToEndAsync();
 				}
 
-				dbConnection.Execute(sqlScript);
+				await dbConnection.ExecuteAsync(sqlScript);
 			}
 			catch (Exception ex)
 			{

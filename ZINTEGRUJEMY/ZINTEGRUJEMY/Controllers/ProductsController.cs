@@ -27,18 +27,18 @@ namespace ZINTEGRUJEMY
 			try
 			{
                 var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
-                var allProducts = _csvReader.ReadCsv<Product>(fileName);
+                var allProducts = await _csvReader.ReadCsvAsync<Product>(fileName);
                 var filteredProducts = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
-                _sqlWriter.WriteToTable(filteredProducts, "Products");
+                await _sqlWriter.WriteToTableAsync(filteredProducts, "Products");
 
                 fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
-                var allInventories = _csvReader.ReadCsv<Inventory>(fileName);
+                var allInventories = await _csvReader.ReadCsvAsync<Inventory>(fileName);
                 var filteredInventories = allInventories.Where(inventory => inventory.Shipping.Equals("24h"));
-                _sqlWriter.WriteToTable(filteredInventories, "Inventory");
+                await _sqlWriter.WriteToTableAsync(filteredInventories, "Inventory");
 
                 fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
-				var prices = _csvReader.ReadCsv<Price>(fileName);
-				_sqlWriter.WriteToTable(prices, "Prices");
+				var prices = await _csvReader.ReadCsvAsync<Price>(fileName);
+				await _sqlWriter.WriteToTableAsync(prices, "Prices");
 			}
 			catch (FileNotFoundException ex)
 			{
@@ -65,7 +65,7 @@ namespace ZINTEGRUJEMY
 		}
 
 		[HttpGet("product-info/{sku}")]
-		public IActionResult GetProductInfo(string sku)
+		public async Task<IActionResult> GetProductInfoAsync(string sku)
 		{
 			return Ok("Ok");
 		}
