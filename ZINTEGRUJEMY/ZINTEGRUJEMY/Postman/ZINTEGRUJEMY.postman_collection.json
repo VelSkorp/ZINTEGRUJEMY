@@ -1,0 +1,62 @@
+{
+	"info": {
+		"_postman_id": "e2b1f277-51c1-42d9-bc3d-81c4a6c3dea9",
+		"name": "ZINTEGRUJEMY",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32462374"
+	},
+	"item": [
+		{
+			"name": "Products",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Products\" : \"https://rekturacjazadanie.blob.core.windows.net/zadanie/Products.csv\",\r\n    \"Inventory\" : \"https://rekturacjazadanie.blob.core.windows.net/zadanie/Inventory.csv\",\r\n    \"Prices\" : \" https://rekturacjazadanie.blob.core.windows.net/zadanie/Prices.csv\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5080/ZINTEGRUJEMY.pl/api/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5080",
+					"path": [
+						"ZINTEGRUJEMY.pl",
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Product Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5080/ZINTEGRUJEMY.pl/api/product-info/0742-114AA-ER003",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5080",
+					"path": [
+						"ZINTEGRUJEMY.pl",
+						"api",
+						"product-info",
+						"0742-114AA-ER003"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
