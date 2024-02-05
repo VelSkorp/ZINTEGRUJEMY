@@ -6,13 +6,11 @@ namespace ZINTEGRUJEMY
 {
 	public class CsvReader
 	{
-		public async Task<IEnumerable<T>> ReadCsvAsync<T>(string fileName)
+		public async Task<IEnumerable<T>> ReadCsvAsync<T>(string filePath)
 		{
-			var filePath = Path.Combine(@".\Data", fileName);
-
 			if (!File.Exists(filePath))
 			{
-				throw new FileNotFoundException($"File {fileName} doesn't exist.");
+				throw new FileNotFoundException($"File {filePath} doesn't exist.");
 			}
 
 			using (var reader = new StreamReader(filePath, Encoding.UTF8, true, 8192))

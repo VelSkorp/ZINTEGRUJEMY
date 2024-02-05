@@ -13,7 +13,7 @@ namespace ZINTEGRUJEMY
 			if (File.Exists(savePath))
 			{
 				Log.Information($"{fileName} file upload has skiped, the file already exists");
-				return fileName;
+				return savePath;
 			}
 
 			using (var httpClient = new HttpClient())
@@ -31,6 +31,7 @@ namespace ZINTEGRUJEMY
 					using (var fileStream = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
 					{
 						await stream.CopyToAsync(fileStream);
+						await fileStream.FlushAsync();
 					}
 
 					return savePath;

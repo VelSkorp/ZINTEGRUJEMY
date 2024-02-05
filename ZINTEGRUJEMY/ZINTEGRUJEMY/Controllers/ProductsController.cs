@@ -28,18 +28,18 @@ namespace ZINTEGRUJEMY
 		{
 			try
 			{
-				var fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
-				var allProducts = await _csvReader.ReadCsvAsync<Product>(fileName);
+				var filePath = await _csvDownloader.DownloadAndSaveCsvAsync(links.Products);
+				var allProducts = await _csvReader.ReadCsvAsync<Product>(filePath);
 				var filteredProducts = allProducts.Where(product => !product.IsWire && product.Shipping.Equals("24h"));
 				await _sqlWriter.WriteToTableAsync(filteredProducts, "Products");
 
-				fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
-				var allInventories = await _csvReader.ReadCsvAsync<Inventory>(fileName);
+				filePath = await _csvDownloader.DownloadAndSaveCsvAsync(links.Inventory);
+				var allInventories = await _csvReader.ReadCsvAsync<Inventory>(filePath);
 				var filteredInventories = allInventories.Where(inventory => inventory.Shipping.Equals("24h"));
 				await _sqlWriter.WriteToTableAsync(filteredInventories, "Inventory");
 
-				fileName = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
-				var prices = await _csvReader.ReadCsvAsync<Price>(fileName);
+				filePath = await _csvDownloader.DownloadAndSaveCsvAsync(links.Prices);
+				var prices = await _csvReader.ReadCsvAsync<Price>(filePath);
 				await _sqlWriter.WriteToTableAsync(prices, "Prices");
 
 				return Accepted("Data successfully downloaded and saved");
